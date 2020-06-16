@@ -1,32 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getUsers } from './api/api';
 import { Content, Loading } from './styles';
 import UserComponent from './components/user/UserComponent';
-import { User } from './components/types/type';
+import { useInfiniteScroll } from './hooks/useInfiniteScroll';
 
 const App: React.FC = () => {
-    const [page, setPage] = useState<number>(1);
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    const handleScroll = (event) => {
-        const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
-
-        if (scrollHeight - scrollTop === clientHeight) {
-            setPage((prev) => prev + 1);
-        }
-    };
-
-    useEffect(() => {
-        const loadUsers = async () => {
-            setLoading(true);
-            const newUsers = await getUsers(page);
-            setUsers((prev: User[]) => [...prev, ...newUsers]);
-            setLoading(false);
-        };
-
-        loadUsers().catch((err) => console.log(err));
-    }, [page]);
+    const { users, loading, handleScroll } = useInfiniteScroll();
 
     return (
         <div className="App">
