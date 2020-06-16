@@ -1,11 +1,10 @@
 import React from 'react';
-import { User } from '../components/types/type';
-import { getUsers } from '../api/api';
 
-export const useInfiniteScroll = () => {
+export const useInfiniteScroll = (apiFunction: (page: number) => Promise<any>) => {
     const [page, setPage] = React.useState<number>(1);
-    const [users, setUsers] = React.useState<User[]>([]);
+    const [data, setData] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState<boolean>(true);
+    const [error, setError] = React.useState<string>('');
 
     const handleScroll = (event) => {
         const { scrollTop, clientHeight, scrollHeight } = event.currentTarget;
@@ -18,13 +17,15 @@ export const useInfiniteScroll = () => {
     React.useEffect(() => {
         const loadUsers = async () => {
             setLoading(true);
-            const newUsers = await getUsers(page);
-            setUsers((prev: User[]) => [...prev, ...newUsers]);
+            const newData = await apiFunction(page);
+            setData((prev: any[]) => [...prev, ...newData]);
             setLoading(false);
         };
 
-        loadUsers().catch((err) => console.log(err));
+        loadUsers().catch((err) => setError(err));
     }, [page]);
 
-    return { users, loading, handleScroll };
+    return {
+        data, loading, handleScroll, error,
+    };
 };
